@@ -28,7 +28,7 @@ def dfs(x, y, direc, cnt, path):
         return
     if map[x][y] == "S":
         res = max(res, cnt // 2)
-        rpath = path.copy()
+        rpath = path.copy() + [(*poss, direc)]
         return
     if symbol[map[x][y]] & direc == 0:
         return
@@ -37,7 +37,7 @@ def dfs(x, y, direc, cnt, path):
 
     vis[x][y] = True
     nxt_direc = symbol[map[x][y]] ^ direc
-    path.append((x, y, direc, directions_tr[nxt_direc]))
+    path.append((x, y, direc))
     dfs(
         x + directions[nxt_direc][0],
         y + directions[nxt_direc][1],
@@ -49,63 +49,20 @@ def dfs(x, y, direc, cnt, path):
     path.pop()
 
 
+# Part 1
 for i in range(4):
     d = 1 << i
     dfs(poss[0] + directions[d][0], poss[1] + directions[d][1], directions_tr[d], 1, [])
 print(res)
 
-for x, y, d, d1 in rpath:
-    map[x][y] += "*"
-map[poss[0]][poss[1]] += "*"
-for i in range(h):
-    for j in range(w):
-        if not map[i][j].endswith("*"):
-            map[i][j] = " "
-        else:
-            map[i][j] = map[i][j][:-1]
-for x, y, d, d1 in rpath:
-    if (d == 2 or d1 == 2) and 0 <= x < h and 0 <= y - 1 < w and map[x][y - 1] == " ":
-        map[x][y - 1] = "B"
-    if (d == 2 or d1 == 2) and 0 <= x < h and 0 <= y + 1 < w and map[x][y + 1] == " ":
-        map[x][y + 1] = "A"
-    if (d == 8 or d1 == 8) and 0 <= x < h and 0 <= y - 1 < w and map[x][y - 1] == " ":
-        map[x][y - 1] = "A"
-    if (d == 8 or d1 == 8) and 0 <= x < h and 0 <= y + 1 < w and map[x][y + 1] == " ":
-        map[x][y + 1] = "B"
-    if (d == 4 or d1 == 4) and 0 <= x + 1 < h and 0 <= y < w and map[x + 1][y] == " ":
-        map[x + 1][y] = "A"
-    if (d == 4 or d1 == 4) and 0 <= x - 1 < h and 0 <= y < w and map[x - 1][y] == " ":
-        map[x - 1][y] = "B"
-    if (d == 1 or d1 == 1) and 0 <= x + 1 < h and 0 <= y < w and map[x + 1][y] == " ":
-        map[x + 1][y] = "B"
-    if (d == 1 or d1 == 1) and 0 <= x - 1 < h and 0 <= y < w and map[x - 1][y] == " ":
-        map[x - 1][y] = "A"
 
-
-def dfs(x, y, ch):
-    for dx, dy in directions.values():
-        if 0 <= x + dx < h and 0 <= y + dy < w and map[x + dx][y + dy] == " ":
-            map[x + dx][y + dy] = ch
-            dfs(x + dx, y + dy, ch)
-
-
-for i in range(h):
-    for j in range(w):
-        if map[i][j] == "A" or map[i][j] == "B":
-            dfs(i, j, map[i][j])
-
-
-print("".join(["".join(t) for t in map]))
-
-acnt = 0
-bcnt = 0
-for i in range(h):
-    for j in range(w):
-        if map[i][j] == "A":
-            acnt += 1
-        elif map[i][j] == "B":
-            bcnt += 1
-        elif map[i][j] == " ":
-            print("WRONG", i, j)
-print("A: ", acnt)
-print("B: ", bcnt)
+# Part 2 Calculate Square
+base_point = (0, 0)
+S = 0
+for i in range(len(rpath)):
+    x1, y1, d = rpath[i]
+    x2, y2, _ = rpath[(i + 1) % len(rpath)]
+    S += x1 * y2 - y1 * x2
+S //= 2
+print("Square: ", abs(S))
+print(abs(S) + 1 - len(rpath) // 2)
